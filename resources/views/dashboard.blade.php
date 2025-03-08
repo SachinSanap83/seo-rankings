@@ -6,52 +6,103 @@
 <div class="bg-white p-6 rounded shadow">
     <h2 class="text-xl font-semibold mb-4">Dashboard</h2>
 
-    <!-- ✅ Search & Filter Form -->
-    <form method="GET" action="{{ route('dashboard') }}" class="mb-4 flex flex-wrap gap-2">
-        <input type="text" name="keyword" placeholder="Search Keyword" value="{{ request('keyword') }}" class="p-2 border rounded">
-        
-        <select name="project_id" class="p-2 border rounded">
-            <option value="">Filter by Project</option>
+    <!-- Search Box -->
+ <input type="text" id="searchInput" class="w-full p-2 border rounded mb-4" placeholder="Search Projects..." onkeyup="searchProjects()">
+ 
+
+    <!-- Projects List -->
+<div class="overflow-x-auto">
+    <table class="w-full border-collapse">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="p-2 border">Name</th>
+                <th class="p-2 border">URL</th>
+                <th class="p-2 border">Keywords</th>
+            </tr>
+        </thead>
+        <tbody id="projectTableBody">
             @foreach ($projects as $project)
-                <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>
-                    {{ $project->name }}
-                </option>
-            @endforeach
-        </select>
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Apply Filters</button>
-    </form>
-
-    <!-- ✅ Projects List with Keywords and Rankings -->
-    @foreach ($projects as $project)
-        <div class="mb-6 p-4 border rounded">
-            <h3 class="text-lg font-bold">{{ $project->name }}</h3>
-            <a href="{{ $project->url }}" target="_blank" class="text-blue-600">{{ $project->url }}</a>
-            <!-- <p class="text-gray-500">{{ $project->url }}</p> -->
-
-            <table class="w-full border-collapse mt-4">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-2 border">Keyword</th>
-                        <th class="p-2 border">Position</th>
-                        <th class="p-2 border">Search Volume</th>
-                        <th class="p-2 border">Competition</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <tr class="border project-row">
+                <td class="p-2 project-name">{{ $project->name }}</td>
+                <td class="p-2"><a href="{{ $project->url }}" class="text-blue-500" target="_blank">{{ $project->url }}</a></td>
+                <td class="p-2">
                     @foreach ($project->keywords as $keyword)
-                        @foreach ($keyword->rankings as $ranking)
-                            <tr class="border">
-                                <td class="p-2">{{ $keyword->keyword }}</td>
-                                <td class="p-2">{{ $ranking->position }}</td>
-                                <td class="p-2">{{ $ranking->search_volume }}</td>
-                                <td class="p-2">{{ $ranking->competition }}</td>
-                            </tr>
-                        @endforeach
+                        <span class="bg-gray-200 text-sm p-1 rounded">{{ $keyword->keyword }}</span>
                     @endforeach
-                </tbody>
-            </table>
-        </div>
-    @endforeach
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
+
+    <!-- Keyword Rankings Chart -->
+     <h2 class="text-xl font-semibold mt-6">Keyword Rankings</h2>
+<div id="chart"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+ 
+ @php
+    // Extract all unique keywords from all projects
+    $allKeywords = collect($chartData)
+        ->flatMap(fn($project) => collect($project['keywords'])->pluck('name'))
+        ->unique()
+        ->values()
+        ->toArray();
+
+    // Generate series data for each project based on correct keyword positions
+    $seriesData = collect($chartData)->map(function ($project) use ($allKeywords) {
+        $rankings = collect($allKeywords)->map(function ($keyword) use ($project) {
+            return collect($project['keywords'])->firstWhere('name', $keyword)['ranking'] ?? 0;
+        })->toArray();
+
+        return [
+            'name' => $project['name'],
+            'data' => $rankings
+        ];
+    })->values();
+@endphp
+
+<script>
+    let allKeywords = {!! json_encode($allKeywords) !!};
+    let seriesData = {!! json_encode($seriesData) !!};
+
+    var options = {
+        chart: {
+            type: 'bar',
+            height: 400
+        },
+        series: seriesData,
+        xaxis: {
+            categories: allKeywords,
+            title: { text: 'Keywords' }
+        },
+        yaxis: {
+            title: { text: 'Ranking Position' }
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+</script>
+
+
+
+    <script>
+    function searchProjects() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let rows = document.querySelectorAll(".project-row");
+
+        rows.forEach(row => {
+            let projectName = row.querySelector(".project-name").innerText.toLowerCase();
+            if (projectName.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
 </div>
 @endsection

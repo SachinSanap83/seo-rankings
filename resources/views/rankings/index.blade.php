@@ -6,29 +6,17 @@
 <div class="bg-white p-6 rounded shadow">
     <h2 class="text-xl font-semibold mb-4">{{ $keyword->keyword }} - Rankings</h2>
 
-    <!-- ✅ Search and Filter Form -->
-    <form method="GET" action="{{ route('rankings.index', $keyword) }}" class="mb-4 flex flex-wrap gap-2">
-        <input type="number" name="position" placeholder="Filter by Position" value="{{ request('position') }}" class="p-2 border rounded">
-        
-        <input type="date" name="start_date" value="{{ request('start_date') }}" class="p-2 border rounded">
-        <input type="date" name="end_date" value="{{ request('end_date') }}" class="p-2 border rounded">
 
-        <select name="sort_by" class="p-2 border rounded">
-            <option value="">Sort By</option>
-            <option value="position" {{ request('sort_by') == 'position' ? 'selected' : '' }}>Position</option>
-            <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Date</option>
-        </select>
+    <div id="chart"></div>
 
-        <select name="order" class="p-2 border rounded">
-            <option value="asc" {{ request('order') == 'asc' ? 'selected' : '' }}>Ascending</option>
-            <option value="desc" {{ request('order') == 'desc' ? 'selected' : '' }}>Descending</option>
-        </select>
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Apply Filters</button>
-    </form>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        var chart = new ApexCharts(document.querySelector("#chart"), {!! $chartData->toJson() !!});
+        chart.render();
+    </script>
 
     <!-- ✅ Rankings Table -->
-    <table class="w-full border-collapse">
+    <table class="w-full border-collapse mt-4">
         <thead>
             <tr class="bg-gray-200">
                 <th class="p-2 border">Date</th>
@@ -48,10 +36,5 @@
             @endforeach
         </tbody>
     </table>
-
-    <!-- ✅ Pagination -->
-    <div class="mt-4">
-        {{ $rankings->links() }}
-    </div>
 </div>
 @endsection
