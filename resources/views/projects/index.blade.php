@@ -19,7 +19,14 @@
                 <a href="{{ route('projects.show', $project) }}" class="text-blue-600">{{ $project->name }}</a>
                 <div>
                 <a href="{{ route('projects.edit', $project) }}" class="text-green-500 mr-2">Edit</a>
-            </div>
+
+            </div> 
+            <form action="{{ route('projects.destroy', $project) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="text-red-500">Delete</button>
+            </form>
+
             </li>
         @endforeach
     </ul>
