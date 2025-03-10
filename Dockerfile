@@ -3,10 +3,7 @@ FROM php:8.2-apache
 
 # Set working directory
 WORKDIR /var/www/html
-
-# Copy .env file
-
-COPY .env /var/www/html/.env
+ 
 
 
 # Install system dependencies and required PHP extensions
