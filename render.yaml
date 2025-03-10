@@ -9,17 +9,29 @@ services:
     envVars:
       - key: APP_ENV
         value: production
-      - key: APP_KEY
-        sync: false
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        value: https://seo-rankings-1.onrender.com/  # Replace with your actual Render domain
+      - key: APP_KEY
+        sync: false  # You must manually set this in Render’s Environment Variables
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
-        value: 127.0.0.1
+        fromService: laravel-db  # Correctly links to the database service
       - key: DB_DATABASE
         value: seo_rankings
       - key: DB_USERNAME
         value: root
       - key: DB_PASSWORD
         value: 
+
+  - type: pserv
+    name: laravel-db
+    env: mysql
+    region: oregon
+    plan: free
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1  # Adjust if needed
