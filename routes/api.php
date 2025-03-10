@@ -22,9 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('projects', ProjectController::class);
-    Route::apiResource('keywords', KeywordController::class);
-    Route::get('rankings/{keyword}', [RankingController::class, 'index']);
-});
+Route::apiResource('projects', ProjectController::class)->names([
+    'index' => 'api.projects.index',
+    'store' => 'api.projects.store',
+    'show' => 'api.projects.show',
+    'update' => 'api.projects.update',
+    'destroy' => 'api.projects.destroy',
+]);
+
  

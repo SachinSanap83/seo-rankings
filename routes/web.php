@@ -26,35 +26,29 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Project Routes
-    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
-    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
-    Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
-    Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
-    Route::delete('/projects/{project}/delete', [ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index'); // ✅ List all projects
+    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store'); // ✅ Store new project
+    Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit'); // ✅ Edit project
+    Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update'); // ✅ Update project
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy'); // ✅ Delete project
 
-
+    // ✅ Place this after `/projects` to avoid conflicts
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show'); // ✅ Show single project
 
     // Keyword Routes
-    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::post('/projects/{project}/keywords', [KeywordController::class, 'store'])->name('keywords.store');
 
     // Rankings Routes
     Route::get('/rankings/{keyword}', [RankingController::class, 'index'])->name('rankings.index');
-
-     
-
-// Route::middleware(['auth'])->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
 });
 
 
