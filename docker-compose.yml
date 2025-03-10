@@ -1,46 +1,69 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: laravel_app
-    restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - .:/var/www
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-      - DB_DATABASE=seo_rankings
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
+    # PHP + Apache Service
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel_app
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - .:/var/www/html
+        networks:
+            - laravel_network
+        # depends_on:
+        #   - db
 
-  db:
-    image: mysql:8.0
-    container_name: mysql_db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: seo_rankings
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
+    #    # Node.js Service
+    # node:
+    #   image: node:22.14.0
+    #   container_name: laravel_node
+    #   restart: unless-stopped
+    #   working_dir: /var/www/html
+    #   volumes:
+    #     - .:/var/www/html
+    #     - /var/www/html/node_modules  # Prevents overwriting node_modules with empty dir
+    #   command: >
+    #     sh -c "npm install && npm run dev"
+    #   networks:
+    #     - laravel_network
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    restart: unless-stopped
-    depends_on:
-      - db
-    environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "8081:80"
+    # # MySQL Database Service
+    # db:
+    #   image: mysql:8.0
+    #   container_name: laravel-db
+    #   restart: always
+    #   environment:
+    #     MYSQL_ROOT_PASSWORD: '!2sdu%EtjWVj3Bs'
+    #     MYSQL_DATABASE: freedb_seo-rankings
+    #     MYSQL_USER: freedb_root-seo-laravel
+    #     MYSQL_PASSWORD: '!2sdu%EtjWVj3Bs'
+    #   volumes:
+    #     - db_data:/var/lib/mysql
+    #   networks:
+    #     - laravel_network
 
-volumes:
-  db_data:
+    # # PHPMyAdmin Service (Optional)
+    # phpmyadmin:
+    #   image: phpmyadmin/phpmyadmin
+    #   container_name: laravel_phpmyadmin
+    #   restart: unless-stopped
+    #   ports:
+    #     - "8080:80"
+    #   environment:
+    #     PMA_HOST: db
+    #     MYSQL_ROOT_PASSWORD: '!2sdu%EtjWVj3Bs'
+    #   depends_on:
+    #     - db
+    #   networks:
+    #     - laravel_network
+
+# Volumes
+# volumes:
+#   db_data:
+
+# Networks
+networks:
+    laravel_network:
+        driver: bridge

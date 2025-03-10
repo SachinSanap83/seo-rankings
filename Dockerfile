@@ -1,33 +1,63 @@
-# Use PHP 8.2 FPM Image
-FROM php:8.2-fpm
+# Use the official PHP 8.2 image with Apache
+FROM php:8.2-apache
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-# Install dependencies
+# Install system dependencies and required PHP extensions
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zip \
-    unzip \
     git \
     curl \
-    mariadb-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo_mysql
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libpq-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_pgsql \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy existing application
+# Copy application source code
 COPY . .
 
-# Set permissions
-RUN chmod -R 777 storage bootstrap/cache
+# Install Laravel dependencies (production mode)
+RUN composer install --optimize-autoloader --no-dev
 
-# Expose port
-EXPOSE 8000
+# Set correct permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Start Laravel
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Configure Apache to use Laravel's public directory as the document root
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Enable Apache rewrite module
+RUN a2enmod rewrite
+
+# Allow .htaccess overrides
+RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
+
+# Suppress Apache warnings
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Set DirectoryIndex to index.php
+RUN echo "DirectoryIndex index.php" >> /etc/apache2/apache2.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start Apache
+CMD ["apache2-foreground"]
