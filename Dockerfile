@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libpq-dev \
+    nodejs \
+    npm \
     && docker-php-ext-install \
         pdo \
         pdo_pgsql \
@@ -25,6 +27,7 @@ RUN apt-get update && apt-get install -y \
         pcntl \
         bcmath \
         gd
+
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
