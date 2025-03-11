@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-    # PHP + Apache Service
+    # Laravel + Apache + PHP
     app:
         build:
             context: .
@@ -11,17 +11,56 @@ services:
             - "8000:80"
         volumes:
             - .:/var/www/html
+            - /var/www/html/vendor
+            - /var/www/html/node_modules
         networks:
             - laravel_network
+        depends_on:
+            - postgres
         environment:
             - DB_CONNECTION=pgsql
-            - DB_HOST=${DB_HOST}
-            - DB_PORT=${DB_PORT}
+            - DB_HOST=postgres
+            - DB_PORT=5432
             - DB_DATABASE=${DB_DATABASE}
             - DB_USERNAME=${DB_USERNAME}
             - DB_PASSWORD=${DB_PASSWORD}
+
+    # PostgreSQL Service
+    postgres:
+        image: postgres:latest
+        container_name: postgres_db
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${DB_DATABASE}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "5432:5432"
+        networks:
+            - laravel_network
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    # pgAdmin for PostgreSQL management
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        restart: unless-stopped
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@example.com
+            PGADMIN_DEFAULT_PASSWORD: admin
+        ports:
+            - "8081:80"
+        depends_on:
+            - postgres
+        networks:
+            - laravel_network
 
 # Networks
 networks:
     laravel_network:
         driver: bridge
+
+# Volumes
+volumes:
+    pgdata:
