@@ -3,8 +3,6 @@ FROM php:8.2-apache
 
 # Set working directory
 WORKDIR /var/www/html
- 
-
 
 # Install system dependencies and required PHP extensions
 RUN apt-get update && apt-get install -y \
@@ -28,7 +26,6 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         gd
 
-
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -40,6 +37,9 @@ COPY . .
 
 # Install Laravel dependencies (production mode)
 RUN composer install --optimize-autoloader --no-dev
+
+# Install Node.js dependencies and build assets
+RUN npm install && npm run build
 
 # Set correct permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
