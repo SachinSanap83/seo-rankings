@@ -43,8 +43,24 @@ RUN npm install && npm run build
 # Set correct permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Configure Apache to use Laravel's public directory as the document root
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
 # Enable Apache rewrite module
 RUN a2enmod rewrite
+
+# Allow .htaccess overrides
+RUN sed -ri -e 's!AllowOverride None!AllowOverride All!g' /etc/apache2/apache2.conf
+
+# Suppress Apache warnings
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Set DirectoryIndex to index.php
+RUN echo "DirectoryIndex index.php" >> /etc/apache2/apache2.conf
+
 
 # Expose port 80
 EXPOSE 80
