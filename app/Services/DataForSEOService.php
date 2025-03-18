@@ -18,7 +18,7 @@ class DataForSEOService
                 'Content-Type' => 'application/json',
             ],
         ]);        
-    }
+    } 
 
     public function fetchKeywordRanking($keyword, $url)
     {

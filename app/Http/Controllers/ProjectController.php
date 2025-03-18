@@ -71,6 +71,8 @@ public function update(Request $request, Project $project)
         if ($project->user_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
+        $project->keywords()->delete();
+
         $project->delete();
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }

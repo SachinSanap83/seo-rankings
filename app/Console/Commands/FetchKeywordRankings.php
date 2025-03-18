@@ -21,6 +21,9 @@ class FetchKeywordRankings extends Command
     {
         $keywords = Keyword::with('project')->get();
 
+        $this->info('Fetching keyword rankings for ' . count($keywords) . $keywords->pluck('keyword')->implode(', '));
+        
+
         foreach ($keywords as $keyword) {
             $rankingData = $this->dataForSEOService->fetchKeywordRanking($keyword->keyword, $keyword->project->url);
 
