@@ -17,19 +17,19 @@ class DashboardController extends Controller
 
           $projects = Project::with('keywords.rankings')->get();
         
-$chartData = $projects->map(function ($project) {
-    return [
-        'name' => $project->name,
-        'keywords' => $project->keywords->map(function ($keyword) {
-            return [
-                'name' => $keyword->keyword ?? 'Unknown',
-                'ranking' => $keyword->rankings->first()->position ?? 0
-            ];
-        })->toArray() ?? [] // Ensure 'keywords' is always an array
-    ];
-})->toArray();
+            $chartData = $projects->map(function ($project) {
+                return [
+                    'name' => $project->name,
+                    'keywords' => $project->keywords->map(function ($keyword) {
+                        return [
+                            'name' => $keyword->keyword ?? 'Unknown',
+                            'ranking' => $keyword->rankings->first()->position ?? 0
+                        ];
+                    })->toArray() ?? [] // Ensure 'keywords' is always an array
+                ];
+            })->toArray();
 
-return view('dashboard', compact('projects','chartData'));
+            return view('dashboard', compact('projects','chartData'));
     }
 
 }

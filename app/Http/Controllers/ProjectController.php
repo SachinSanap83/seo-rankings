@@ -18,7 +18,7 @@ class ProjectController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'url' => 'required|url',
+            'url' => 'required',
         ]);
 
         Project::create([
@@ -54,7 +54,7 @@ public function update(Request $request, Project $project)
 
     $request->validate([
         'name' => 'required|string',
-        'url' => 'required|url',
+        'url' => 'required',
     ]);
 
     $project->update([

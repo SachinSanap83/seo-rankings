@@ -16,7 +16,7 @@
                     <input type="text" name="name" placeholder="Project Name" class="p-3 border border-gray-300 rounded-lg w-full focus:ring focus:ring-blue-300">
                 </div>
                 <div class="mb-4">
-                    <input type="url" name="url" placeholder="Project URL" class="p-3 border border-gray-300 rounded-lg w-full focus:ring focus:ring-blue-300">
+                    <input type="text" name="url" placeholder="Project URL" class="p-3 border border-gray-300 rounded-lg w-full focus:ring focus:ring-blue-300">
                 </div>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg transition">Create Project</button>
             </form>

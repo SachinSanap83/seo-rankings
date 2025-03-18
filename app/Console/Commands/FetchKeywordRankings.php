@@ -24,17 +24,29 @@ class FetchKeywordRankings extends Command
         foreach ($keywords as $keyword) {
             $rankingData = $this->dataForSEOService->fetchKeywordRanking($keyword->keyword, $keyword->project->url);
 
+            $metricsData = $this->dataForSEOService->getKeywordMetrics($keyword->keyword);
+            $position = $rankingData['position'] ?? null;
+    
+            $searchVolume = $metricsData['search_volume'] ?? null;
+            $competition = $metricsData['competition_index'] ?? null;
+
             if ($rankingData) {
-                KeywordRanking::create([
-                    'keyword_id' => $keyword->id,
-                    'position' => $rankingData['rank_absolute'] ?? null,
-                    'search_volume' => $rankingData['search_volume'] ?? 0,
-                    'competition' => $rankingData['competition'] ?? 0,
-                ]);
+                KeywordRanking::updateOrCreate(
+                    [ 
+                        'keyword_id' => $keyword->id,
+                    ],
+                    [
+                        'position' => $position,
+                        'search_volume' => $searchVolume ?? 0,
+                        'competition' => $competition ?? 0.0,
+                    ]
+                );
+                
                 $this->info("Ranking fetched for {$keyword->keyword}");
             } else {
                 $this->warn("Failed to fetch ranking for {$keyword->keyword}");
             }
         }
+        $this->info(' Keyword rankings updated successfully!');
     }
 }
